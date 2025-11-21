@@ -191,6 +191,8 @@ Grid3D electricFieldUpdate(Grid3D grid) {
                 grid[i][j][k].Ex0 = grid[i][j][k].Ex;
                 grid[i][j][k].Ey0 = grid[i][j][k].Ey;
                 grid[i][j][k].Ez0 = grid[i][j][k].Ez;
+
+                // New e-field components
                 double newEx,newEy,newEz;
                 // Ex
                 newEx = (grid[i][j][k].Hz - grid[i][j][k].Hy);
@@ -318,6 +320,19 @@ Grid3D applyABC(Grid3D grid) {
     return grid;
 }
 
+double GaussLaw(Grid3D grid) {
+    int imax = GRIDSIZE-1;
+    double totalFlux;
+    for (int ind1=0;ind1<GRIDSIZE;ind1++) {
+        for (int ind2=0;ind2<GRIDSIZE;ind2++) {
+            totalFlux += grid[imax][ind1][ind2].Ex - grid[0][ind1][ind2].Ex;
+            totalFlux += grid[ind1][imax][ind2].Ey - grid[ind1][0][ind2].Ey;
+            totalFlux += grid[ind1][ind2][imax].Ez - grid[ind1][ind2][0].Ez;
+        }
+    }
+    return totalFlux;
+}
+
 // Main
 int main() {
     // Initialize grid
@@ -327,9 +342,10 @@ int main() {
 
     // Electric Field
     grid = electricFieldRelaxation(grid);
+    grid = writeOut(grid,0);
     
     // MAIN LOOP
-    for (int i=0;i<500;i++) {
+    for (int i=1;i<500;i++) {
         currentTime += 0.5*TIMESTEP;
 
         grid = currentUpdate(grid,currentTime);
@@ -339,11 +355,12 @@ int main() {
 
         grid = chargeUpdate(grid,currentTime);
         grid = electricFieldUpdate(grid);       // Check for issues
-        grid = applyABC(grid);
+        // grid = applyABC(grid);
 
         // Writing all grid data
         grid = writeOut(grid,i);
-        cout << "Written" << endl;
+        double energy = GaussLaw(grid);
+        cout << to_string(energy) << endl;
     }
 
     
