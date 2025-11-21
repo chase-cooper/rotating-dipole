@@ -1,19 +1,1 @@
 $ cat .gitignore
-outputs/ex/*
-outputs/ey/*
-outputs/ez/*
-outputs/hx/*
-outputs/hy/*
-outputs/hz/*
-outputs/jx/*
-outputs/jy/*
-outputs/p/*
-!outputs/ex
-!outputs/ey
-!outputs/ez
-!outputs/hx
-!outputs/hy
-!outputs/hz
-!outputs/jx
-!outputs/jy
-!outputs/p
