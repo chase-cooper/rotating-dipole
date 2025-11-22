@@ -5,7 +5,7 @@
 // #include "structs.cpp"
 using namespace std;
 
-Grid3D writeOut(Grid3D grid,int id) {
+void writeOut(Grid3D grid,int id) {
     // Defining files that hold data
     ofstream exfile("outputs/ex/ex"+to_string(id)+".dat");
     ofstream eyfile("outputs/ey/ey"+to_string(id)+".dat");
@@ -16,6 +16,8 @@ Grid3D writeOut(Grid3D grid,int id) {
     ofstream jxfile("outputs/jx/jx"+to_string(id)+".dat");
     ofstream jyfile("outputs/jy/jy"+to_string(id)+".dat");
     ofstream pfile("outputs/p/p"+to_string(id)+".dat");
+    ofstream econfile("outputs/econ/econ"+to_string(id)+".dat");
+    ofstream hconfile("outputs/hcon/hcon"+to_string(id)+".dat");
 
     // Write grid side length, for reshaping data later
     exfile << GRIDSIZE << endl;
@@ -27,6 +29,8 @@ Grid3D writeOut(Grid3D grid,int id) {
     jxfile << GRIDSIZE << endl;
     jyfile << GRIDSIZE << endl;
     pfile << GRIDSIZE << endl;
+    econfile << GRIDSIZE << endl;
+    hconfile << GRIDSIZE << endl;
 
     // Set precision t avoid saving unneccessarily precise data
     exfile << setprecision(4);
@@ -38,6 +42,8 @@ Grid3D writeOut(Grid3D grid,int id) {
     jxfile << setprecision(4);
     jyfile << setprecision(4);
     pfile << setprecision(4);
+    econfile << setprecision(4);
+    hconfile << setprecision(4);
 
     // Write data
     for (int i=0;i<GRIDSIZE;i++) {
@@ -53,6 +59,8 @@ Grid3D writeOut(Grid3D grid,int id) {
                 jxfile << grid[i][j][k].Jx << "\t";
                 jyfile << grid[i][j][k].Jy << "\t";
                 pfile << grid[i][j][k].p << "\t";
+                econfile << grid[i][j][k].EConstraint << "\t";
+                hconfile << grid[i][j][k].HConstraint << "\t";
             }
         }
     }
@@ -67,6 +75,6 @@ Grid3D writeOut(Grid3D grid,int id) {
     jxfile.close();
     jyfile.close();
     pfile.close();
-
-    return grid;
+    econfile.close();
+    hconfile.close();
 }

@@ -74,53 +74,23 @@ def update3D(frame):
         x.append(xx - size1/2)
         y.append(yy - size1/2)
         z.append(zz - size1/2)
-        if abs(val) > 1e+1: 
+        if abs(val) > 1e-2: 
             u.append(val/arrowScaleFactor)
         else:
             u.append(0)
     for index,val in np.ndenumerate(data2):
-        if abs(val) > 1e+1:
+        if abs(val) > 1e-2:
             v.append(val/arrowScaleFactor)
         else: v.append(0)
     for index,val in np.ndenumerate(data3):
-        if abs(val) > 1e+1:
+        if abs(val) > 1e-2:
             w.append(val/arrowScaleFactor)
             cols.append(val)
         else: 
-            w.append(val)
+            w.append(0)
             cols.append(val)
-    ax1.quiver(x,y,z,u,v,w,colors=cmap(norm(cols)),normalize=False)
+    ax1.quiver(x,y,z,u,v,w,colors=cmap(norm(cols)),normalize=True)
 
-    # data1,size1 = readGridFile(jx)
-    # data2,size2 = readGridFile(jy)
-
-    # x,y,z = [],[],[]
-    # c = []
-    # for index,val in np.ndenumerate(data1):
-    #     if abs(val) > 1e-3:
-    #         xx,yy,zz = index
-    #         x.append(xx - size1/2)
-    #         y.append(yy - size1/2)
-    #         z.append(zz - size1/2)
-    #         c.append(val)
-    # ax1.scatter(x,y,z,c=c)
-
-    # x,y,z = [],[],[]
-    # c = []
-    # for index,val in np.ndenumerate(data2):
-    #     if abs(val) > 1e-2:
-    #         xx,yy,zz = index
-    #         x.append(xx - size2/2)
-    #         y.append(yy - size2/2)
-    #         z.append(zz - size2/2)
-    #         c.append(val)
-    # ax2.scatter(x,y,z,c=c)
-
-# hz = f"outputs/hz/hz10.dat"
-# data,size = readGridFile(hz)
-# data = data.reshape(size,size,size)
-# ax1.imshow(data[:,:,size//2])
-# print(np.min(data),np.max(data))
 
 def update2D(frame):
     ax1.clear()
@@ -128,10 +98,14 @@ def update2D(frame):
     hz = f"outputs/hz/hz{frame}.dat"
     data,size = readGridFile(hz)
     data = data.reshape(size,size,size)
-    ax1.imshow(data[:,:,size//2],vmin=-1,vmax=1,cmap='coolwarm')
-    # print(min(data),max(data))
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=200,interval=50)
+    side = (size-1)//2
+    ax1.imshow(data[:,:,size//2],cmap='coolwarm')#,extent=[-side,side,-side,side])
+    
+    # print(min(data),max(data))
+# update2D(10)
+
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=300,interval=50)
 ani.save(filename="figs/test_hfield.gif", writer="pillow")
 
 plt.show()
