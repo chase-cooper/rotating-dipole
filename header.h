@@ -5,6 +5,6 @@
 
 #define OMEGA 0.2*PI     // filler? i barely know 'er
 #define SIGMA 0.8        // filler
-#define GRIDSIZE 40
+#define GRIDSIZE 30
 #define GRIDSTEP 0.5     // filler
 #define TIMESTEP 0.2     // filler
