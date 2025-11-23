@@ -58,9 +58,9 @@ def update3D(frame):
     jy = f"outputs/jy/jy{frame}.dat"
     p = f"outputs/p/p{frame}.dat"
 
-    data1,size1 = readGridFile(hx)
-    data2,size2 = readGridFile(hy)
-    data3,size3 = readGridFile(hz)
+    data1,size1 = readGridFile(ex)
+    data2,size2 = readGridFile(ey)
+    data3,size3 = readGridFile(ez)
     
     x,y,z = [],[],[]
     u,v,w = [],[],[]
@@ -74,16 +74,16 @@ def update3D(frame):
         x.append(xx - size1/2)
         y.append(yy - size1/2)
         z.append(zz - size1/2)
-        if abs(val) > 1e-2: 
+        if abs(val) > 1e+0: 
             u.append(val/arrowScaleFactor)
         else:
             u.append(0)
     for index,val in np.ndenumerate(data2):
-        if abs(val) > 1e-2:
+        if abs(val) > 1e+0:
             v.append(val/arrowScaleFactor)
         else: v.append(0)
     for index,val in np.ndenumerate(data3):
-        if abs(val) > 1e-2:
+        if abs(val) > 1e+0:
             w.append(val/arrowScaleFactor)
             cols.append(val)
         else: 
@@ -103,9 +103,9 @@ def update2D(frame):
     ax1.imshow(data[:,:,size//2],cmap='coolwarm')#,extent=[-side,side,-side,side])
     
     # print(min(data),max(data))
-# update2D(10)
+# update2D(0)
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=300,interval=50)
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=500,interval=25)
 ani.save(filename="figs/test_hfield.gif", writer="pillow")
 
 plt.show()

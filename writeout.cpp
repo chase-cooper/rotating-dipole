@@ -16,6 +16,7 @@ void writeOut(Grid3D grid,int id) {
     ofstream jxfile("outputs/jx/jx"+to_string(id)+".dat");
     ofstream jyfile("outputs/jy/jy"+to_string(id)+".dat");
     ofstream pfile("outputs/p/p"+to_string(id)+".dat");
+    ofstream phifile("outputs/phi/phi"+to_string(id)+".dat");
     ofstream econfile("outputs/econ/econ"+to_string(id)+".dat");
     ofstream hconfile("outputs/hcon/hcon"+to_string(id)+".dat");
 
@@ -29,6 +30,7 @@ void writeOut(Grid3D grid,int id) {
     jxfile << GRIDSIZE << endl;
     jyfile << GRIDSIZE << endl;
     pfile << GRIDSIZE << endl;
+    phifile << GRIDSIZE << endl;
     econfile << GRIDSIZE << endl;
     hconfile << GRIDSIZE << endl;
 
@@ -42,6 +44,7 @@ void writeOut(Grid3D grid,int id) {
     jxfile << setprecision(4);
     jyfile << setprecision(4);
     pfile << setprecision(4);
+    phifile << setprecision(4);
     econfile << setprecision(4);
     hconfile << setprecision(4);
 
@@ -59,6 +62,7 @@ void writeOut(Grid3D grid,int id) {
                 jxfile << grid[i][j][k].Jx << "\t";
                 jyfile << grid[i][j][k].Jy << "\t";
                 pfile << grid[i][j][k].p << "\t";
+                phifile << grid[i][j][k].phi << "\t";
                 econfile << grid[i][j][k].EConstraint << "\t";
                 hconfile << grid[i][j][k].HConstraint << "\t";
             }
@@ -75,6 +79,7 @@ void writeOut(Grid3D grid,int id) {
     jxfile.close();
     jyfile.close();
     pfile.close();
+    phifile.close();
     econfile.close();
     hconfile.close();
 }
