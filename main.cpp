@@ -52,12 +52,12 @@ DipoleUpdate updateDipole(Cell c,double t) {    // (porbably) Non-dimensionalize
     double dzneg = c.z - zneg;
 
     // Calculate each charge as a thin Gaussian distribution
-    double Gpos = pow(PI*SIGMA*SIGMA,-1.5)*exp(-(dxpos*dxpos + dypos*dypos + dzpos*dzpos)/(SIGMA*SIGMA));
-    double Gneg = pow(PI*SIGMA*SIGMA,-1.5)*exp(-(dxneg*dxneg + dyneg*dyneg + dzneg*dzneg)/(SIGMA*SIGMA));
+    double Gpos = pow(GRIDSTEP/(sqrt(PI)*SIGMA),3)*exp(-(dxpos*dxpos + dypos*dypos + dzpos*dzpos)/(SIGMA*SIGMA));
+    double Gneg = pow(GRIDSTEP/(sqrt(PI)*SIGMA),3)*exp(-(dxneg*dxneg + dyneg*dyneg + dzneg*dzneg)/(SIGMA*SIGMA));
 
-    res.p = Gpos - Gneg;                        // Charge density, units of elementary charges
-    res.Jx = -sin(2.*PI*t)*(Gpos+Gneg);               // Current density x-component
-    res.Jy = cos(2.*PI*t)*(Gpos+Gneg);                // Current density y-component
+    res.p = Gpos - Gneg;                                // Charge density
+    res.Jx = -sin(2.*PI*t)*(Gpos+Gneg);                 // Current density x-component
+    res.Jy = cos(2.*PI*t)*(Gpos+Gneg);                  // Current density y-component
     return res;
 }
 
@@ -207,6 +207,16 @@ Grid3D electricFieldUpdate(Grid3D grid) {
                 if (i>0) {newEz -= grid[i-1][j][k].Hy;}
                 if (j>0) {newEz += grid[i][j-1][k].Hx;}
                 grid[i][j][k].Ez += TIMESTEP*newEz/EPS0/GRIDSTEP;
+
+                // E-field constraint
+                double econ = 0;
+                if (i>0) {econ -= grid[i-1][j][k].Ex;}
+                if (i<GRIDSIZE-1) {econ += grid[i+1][j][k].Ex;}
+                if (j>0) {econ -= grid[i][j-1][k].Ey;}
+                if (j<GRIDSIZE-1) {econ += grid[i][j+1][k].Ey;}
+                if (k>0) {econ -= grid[i][j][k-1].Ez;}
+                if (k<GRIDSIZE-1) {econ += grid[i][j][k+1].Ez;}
+                grid[i][j][k].EConstraint = econ/GRIDSTEP - grid[i][j][k].p/EPS0;
             }
         }
     }

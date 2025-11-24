@@ -95,8 +95,9 @@ def update3D(frame):
 def update2D(frame):
     ax1.clear()
 
-    hz = f"outputs/hz/hz{frame}.dat"
+    hz = f"outputs/econ/econ{frame}.dat"
     data,size = readGridFile(hz)
+    print("Total charge: ",np.sum(np.abs(data)))
     data = data.reshape(size,size,size)
 
     side = (size-1)//2
@@ -105,7 +106,7 @@ def update2D(frame):
     # print(min(data),max(data))
 # update2D(0)
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=500,interval=25)
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=50,interval=50)
 ani.save(filename="figs/test_hfield.gif", writer="pillow")
 
 plt.show()

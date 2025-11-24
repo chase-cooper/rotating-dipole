@@ -35,18 +35,18 @@ void writeOut(Grid3D grid,int id) {
     hconfile << GRIDSIZE << endl;
 
     // Set precision t avoid saving unneccessarily precise data
-    exfile << setprecision(4);
-    eyfile << setprecision(4);
-    ezfile << setprecision(4);
-    hxfile << setprecision(4);
-    hyfile << setprecision(4);
-    hzfile << setprecision(4);
-    jxfile << setprecision(4);
-    jyfile << setprecision(4);
-    pfile << setprecision(4);
-    phifile << setprecision(4);
-    econfile << setprecision(4);
-    hconfile << setprecision(4);
+    // exfile << setprecision(4);
+    // eyfile << setprecision(4);
+    // ezfile << setprecision(4);
+    // hxfile << setprecision(4);
+    // hyfile << setprecision(4);
+    // hzfile << setprecision(4);
+    // jxfile << setprecision(4);
+    // jyfile << setprecision(4);
+    // pfile << setprecision(4);
+    // phifile << setprecision(4);
+    // econfile << setprecision(4);
+    // hconfile << setprecision(4);
 
     // Write data
     for (int i=0;i<GRIDSIZE;i++) {
