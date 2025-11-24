@@ -63,7 +63,7 @@ DipoleUpdate updateDipole(Cell c,double t) {    // (porbably) Non-dimensionalize
 
 Grid3D electricFieldRelaxation(Grid3D grid) {   // (likely) finished
 
-    for (int t = 0;t<500;t++) {
+    for (int t = 0;t<100;t++) {
         // The below loops iteratively approximate the electric potential over the grid. The cells
         //  are split into red and black squares, and they are calculated separately.
 
@@ -75,7 +75,7 @@ Grid3D electricFieldRelaxation(Grid3D grid) {   // (likely) finished
                 
                     if (grid[i][j][k].color==0) {continue;}
 
-                    double new_phi = pow(GRIDSTEP,2.)*grid[i][j][k].p/EPS0;
+                    double new_phi = pow(GRIDSTEP,2.)*grid[i][j][k].p;
                     if (i != 0) {new_phi += grid[i-1][j][k].phi;}
                     if (i != GRIDSIZE-1) {new_phi += grid[i+1][j][k].phi;}
                     if (j != 0) {new_phi += grid[i][j-1][k].phi;}
@@ -94,7 +94,7 @@ Grid3D electricFieldRelaxation(Grid3D grid) {   // (likely) finished
                 
                     if (grid[i][j][k].color==1) {continue;}
 
-                    double new_phi = pow(GRIDSTEP,2.)*grid[i][j][k].p/EPS0;
+                    double new_phi = pow(GRIDSTEP,2.)*grid[i][j][k].p;
                     if (i != 0) {new_phi += grid[i-1][j][k].phi;}
                     if (i != GRIDSIZE-1) {new_phi += grid[i+1][j][k].phi;}
                     if (j != 0) {new_phi += grid[i][j-1][k].phi;}
@@ -133,8 +133,8 @@ Grid3D electricFieldRelaxation(Grid3D grid) {   // (likely) finished
                     if (k != imax) {laplacian += grid[i][j][imax].phi;}
                     laplacian = (laplacian - 6.*grid[i][j][k].phi)/(GRIDSTEP*GRIDSTEP);
 
-                    double residual = -pow(GRIDSTEP,3.)*grid[i][j][k].p/EPS0 - laplacian;
-                    residual = residual/pow(grid[i][j][k].p/EPS0,2.);
+                    double residual = -pow(GRIDSTEP,3.)*grid[i][j][k].p - laplacian;
+                    residual = residual/pow(grid[i][j][k].p,2.);
                     if (abs(residual) > max_residual) {max_residual = abs(residual);}
                     sum_residuals += residual;
                 }
@@ -165,13 +165,28 @@ Grid3D electricFieldRelaxation(Grid3D grid) {   // (likely) finished
     return grid;
 }
 
-Grid3D chargeCurrentUpdate(Grid3D grid,double currentTime) {
+Grid3D chargeUpdate(Grid3D grid,double currentTime) {
     for (int i=0;i<GRIDSIZE;i++) {
         for (int j=0;j<GRIDSIZE;j++) {
             for (int k=0;k<GRIDSIZE;k++) {
                 // Get charge density at this cell center
                 DipoleUpdate du = updateDipole(grid[i][j][k],currentTime);
                 grid[i][j][k].p = du.p;     // probably fine
+                // grid[i][j][k].Jx = du.Jx;     
+                // grid[i][j][k].Jy = du.Jy;     
+            }
+        }
+    }
+    return grid;
+}
+
+Grid3D currentUpdate(Grid3D grid,double currentTime) {
+    for (int i=0;i<GRIDSIZE;i++) {
+        for (int j=0;j<GRIDSIZE;j++) {
+            for (int k=0;k<GRIDSIZE;k++) {
+                // Get charge density at this cell center
+                DipoleUpdate du = updateDipole(grid[i][j][k],currentTime);
+                // grid[i][j][k].p = du.p;     // probably fine
                 grid[i][j][k].Jx = du.Jx;     
                 grid[i][j][k].Jy = du.Jy;     
             }
@@ -196,17 +211,17 @@ Grid3D electricFieldUpdate(Grid3D grid) {
                 newEx = (grid[i][j][k].Hz - grid[i][j][k].Hy);
                 if (j>0) {newEx -= grid[i][j-1][k].Hz;}
                 if (k>0) {newEx += grid[i][j][k-1].Hy;}
-                grid[i][j][k].Ex += TIMESTEP*(newEx/GRIDSTEP - grid[i][j][k].Jx)/EPS0;
+                grid[i][j][k].Ex += 0.5*(newEx - GRIDSTEP*grid[i][j][k].Jx);
                 // Ey
                 newEy = (grid[i][j][k].Hx - grid[i][j][k].Hz);
                 if (k>0) {newEy -= grid[i][j][k-1].Hx;}
                 if (i>0) {newEy += grid[i-1][j][k].Hz;}
-                grid[i][j][k].Ey += TIMESTEP*(newEy/GRIDSTEP - grid[i][j][k].Jy)/EPS0;
+                grid[i][j][k].Ey += 0.5*(newEy - GRIDSTEP*grid[i][j][k].Jy);
                 // Ez
                 newEz = (grid[i][j][k].Hy - grid[i][j][k].Hx);
                 if (i>0) {newEz -= grid[i-1][j][k].Hy;}
                 if (j>0) {newEz += grid[i][j-1][k].Hx;}
-                grid[i][j][k].Ez += TIMESTEP*newEz/EPS0/GRIDSTEP;
+                grid[i][j][k].Ez += 0.5*newEz;
 
                 // E-field constraint
                 double econ = 0;
@@ -216,7 +231,7 @@ Grid3D electricFieldUpdate(Grid3D grid) {
                 if (j<GRIDSIZE-1) {econ += grid[i][j+1][k].Ey;}
                 if (k>0) {econ -= grid[i][j][k-1].Ez;}
                 if (k<GRIDSIZE-1) {econ += grid[i][j][k+1].Ez;}
-                grid[i][j][k].EConstraint = econ/GRIDSTEP - grid[i][j][k].p/EPS0;
+                grid[i][j][k].EConstraint = econ/GRIDSTEP - grid[i][j][k].p;
             }
         }
     }
@@ -237,17 +252,27 @@ Grid3D magneticFieldUpdate(Grid3D grid) {
                 newHx = (-grid[i][j][k].Ez + grid[i][j][k].Ey);
                 if (j<GRIDSIZE-1) {newHx += grid[i][j+1][k].Ez;}
                 if (k<GRIDSIZE-1) {newHx -= grid[i][j][k+1].Ey;}
-                grid[i][j][k].Hx -= (TIMESTEP)*newHx/MU0/(GRIDSTEP);
+                grid[i][j][k].Hx -= 0.5*newHx;
                 // Hy
                 newHy = (-grid[i][j][k].Ex+grid[i][j][k].Ez);
                 if (k<GRIDSIZE-1) {newHy += grid[i][j][k+1].Ex;}
                 if (i<GRIDSIZE-1) {newHy -= grid[i+1][j][k].Ez;}
-                grid[i][j][k].Hy -= (TIMESTEP)*newHy/MU0/(GRIDSTEP);
+                grid[i][j][k].Hy -= 0.5*newHy;
                 // Hz
                 newHz = (-grid[i][j][k].Ey + grid[i][j][k].Ex);
                 if (i<GRIDSIZE-1) {newHz += grid[i+1][j][k].Ey;}
                 if (j<GRIDSIZE-1) {newHz -= grid[i][j+1][k].Ex;}
-                grid[i][j][k].Hz -= (TIMESTEP)*newHz/MU0/(GRIDSTEP);
+                grid[i][j][k].Hz -= 0.5*newHz;
+
+                // H-field constraint
+                double hcon = 0;
+                if (i>0) {hcon -= grid[i-1][j][k].Hx;}
+                if (i<GRIDSIZE-1) {hcon += grid[i+1][j][k].Hx;}
+                if (j>0) {hcon -= grid[i][j-1][k].Hy;}
+                if (j<GRIDSIZE-1) {hcon += grid[i][j+1][k].Hy;}
+                if (k>0) {hcon -= grid[i][j][k-1].Hz;}
+                if (k<GRIDSIZE-1) {hcon += grid[i][j][k+1].Hz;}
+                grid[i][j][k].HConstraint = hcon/GRIDSTEP;
             }
         }
     }
@@ -258,7 +283,7 @@ Grid3D applyABC(Grid3D grid) {
 
     // Need to be updated all at once, not one by one?
 
-    double coeff = (C*TIMESTEP - GRIDSTEP)/(C*TIMESTEP + GRIDSTEP);
+    double coeff = (TIMESTEP - GRIDSTEP)/(TIMESTEP + GRIDSTEP);
     int imax=GRIDSIZE-1;        // max index (i/j/k) shorthand
 
     Cell emptyCell = {0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -302,8 +327,10 @@ int main() {
     // // Initialize grid
     double currentTime = 0.;
     Grid3D grid = initGrid();
-    grid = chargeCurrentUpdate(grid,currentTime);
     grid = electricFieldRelaxation(grid);
+    // E-field relaxation then updates, might switch back
+    grid = chargeUpdate(grid,currentTime);
+    grid = currentUpdate(grid,currentTime);
     cout << "Gauss' Law initial estimate: q = " << to_string(GaussLaw(grid)) << endl;
 
     writeOut(grid,0);
@@ -312,12 +339,13 @@ int main() {
     for (int count=1;count <= LOOPCOUNT;count++) {       // count is just the loop counter variable
         // Magnetic field half-step
         currentTime += 0.5*TIMESTEP;
-        grid = chargeCurrentUpdate(grid,currentTime);
+        grid = currentUpdate(grid,currentTime);
+        
         grid = magneticFieldUpdate(grid);
 
         // Electric field half-step
         currentTime += 0.5*TIMESTEP;
-        grid = chargeCurrentUpdate(grid,currentTime);
+        grid = chargeUpdate(grid,currentTime);
         grid = electricFieldUpdate(grid);
         // grid = applyABC(grid);
 

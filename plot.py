@@ -37,7 +37,7 @@ fig = plt.figure()
 fig.suptitle("This animation is dedicated to Rebecca Moore.\n She's not dead but goddamn",size='x-large')
 gs = fig.add_gridspec(ncols=2)
 ax1 = fig.add_subplot(gs[:])
-# ax1 = fig.add_subplot(gs[:],projection="3d")
+# ax1 = fig.add_subplot(gs[0],projection="3d")
 # ax2 = fig.add_subplot(gs[1],projection="3d")
 arrowScaleFactor = 3
 
@@ -62,6 +62,40 @@ def update3D(frame):
     data2,size2 = readGridFile(ey)
     data3,size3 = readGridFile(ez)
     
+    xe,ye,ze = [],[],[]
+    ue,ve,we = [],[],[]
+
+    cols = []
+    cmap = cm.coolwarm
+    norm = Normalize()
+    norm.autoscale(cols)
+    for index,val in np.ndenumerate(data1):
+        xx,yy,zz = index
+        xe.append(xx - size1/2)
+        ye.append(yy - size1/2)
+        ze.append(zz - size1/2)
+        if abs(val) > 1e-5: 
+            ue.append(val/arrowScaleFactor)
+        else:
+            ue.append(0)
+    for index,val in np.ndenumerate(data2):
+        if abs(val) > 1e-5:
+            ve.append(val/arrowScaleFactor)
+        else: ve.append(0)
+    for index,val in np.ndenumerate(data3):
+        if abs(val) > 1e-5:
+            we.append(val/arrowScaleFactor)
+            cols.append(val)
+        else: 
+            we.append(0)
+            cols.append(val)
+    ax1.quiver(xe,ye,ze,ue,ve,we,colors=cmap(norm(cols)),normalize=True)
+
+    ax2.clear()
+    data1,size1 = readGridFile(hx)
+    data2,size2 = readGridFile(hy)
+    data3,size3 = readGridFile(hz)
+    
     x,y,z = [],[],[]
     u,v,w = [],[],[]
 
@@ -74,37 +108,66 @@ def update3D(frame):
         x.append(xx - size1/2)
         y.append(yy - size1/2)
         z.append(zz - size1/2)
-        if abs(val) > 1e+0: 
+        if abs(val) > 1e-5: 
             u.append(val/arrowScaleFactor)
         else:
             u.append(0)
     for index,val in np.ndenumerate(data2):
-        if abs(val) > 1e+0:
+        if abs(val) > 1e-5:
             v.append(val/arrowScaleFactor)
         else: v.append(0)
     for index,val in np.ndenumerate(data3):
-        if abs(val) > 1e+0:
+        if abs(val) > 1e-5:
             w.append(val/arrowScaleFactor)
             cols.append(val)
         else: 
             w.append(0)
             cols.append(val)
-    ax1.quiver(x,y,z,u,v,w,colors=cmap(norm(cols)),normalize=True)
+    ax2.quiver(x,y,z,u,v,w,colors=cmap(norm(cols)),normalize=True)
 
+
+    for i in range(len(w)):
+        vec1 = np.array([u[i],v[i],w[i]])
+        vec2 = np.array([ue[i],ve[i],we[i]])
+        print(np.dot(vec1,vec2))
 
 def update2D(frame):
     ax1.clear()
 
-    hz = f"outputs/econ/econ{frame}.dat"
-    data,size = readGridFile(hz)
-    print("Total charge: ",np.sum(np.abs(data)))
+    p = f"outputs/econ/econ{frame}.dat"
+    data,size = readGridFile(p)
     data = data.reshape(size,size,size)
+    ax1.imshow(data[:,:,size//2],cmap="Purples")
+    print(np.min(data),np.max(data))
+
+def update2Darrow(frame):
+    ax1.clear()
+
+    ex = f"outputs/hx/hx{frame}.dat"
+    ey = f"outputs/hy/hy{frame}.dat"
+    datax,size = readGridFile(ex)
+    datay,_ = readGridFile(ey)
+    # print("Total charge: ",np.sum(np.abs(data)))
+    datax = datax.reshape(size,size,size)
+    datay = datay.reshape(size,size,size)
+
+    x,y,u,v = [],[],[],[]
+    for index,val in np.ndenumerate(datax):
+        xx,yy,_ = index
+        x.append(xx)
+        y.append(yy)
+        u.append(val)
+    for index,val in np.ndenumerate(datay):
+        v.append(val)
 
     side = (size-1)//2
-    ax1.imshow(data[:,:,size//2],cmap='coolwarm')#,extent=[-side,side,-side,side])
+    ax1.quiver(x,y,u,v,cmap='coolwarm')#,extent=[-side,side,-side,side])
     
-    # print(min(data),max(data))
-# update2D(0)
+    print(np.min(datax),np.max(datax))
+
+# update2D(1)
+# update2Darrow(0)
+# update3D(5)
 
 ani = anim.FuncAnimation(fig=fig,func=update2D,frames=50,interval=50)
 ani.save(filename="figs/test_hfield.gif", writer="pillow")
