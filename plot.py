@@ -35,8 +35,10 @@ def plotGrid(gridarray,gridsize):
 
 fig = plt.figure()
 fig.suptitle("This animation is dedicated to Rebecca Moore.\n She's not dead but goddamn",size='x-large')
-gs = fig.add_gridspec(ncols=2)
+gs = fig.add_gridspec(ncols=3)
 ax1 = fig.add_subplot(gs[:])
+# ax2 = fig.add_subplot(gs[1])
+# ax3 = fig.add_subplot(gs[2])
 # ax1 = fig.add_subplot(gs[0],projection="3d")
 # ax2 = fig.add_subplot(gs[1],projection="3d")
 arrowScaleFactor = 3
@@ -134,11 +136,13 @@ def update3D(frame):
 def update2D(frame):
     ax1.clear()
 
-    p = f"outputs/econ/econ{frame}.dat"
-    data,size = readGridFile(p)
-    data = data.reshape(size,size,size)
-    ax1.imshow(data[:,:,size//2],cmap="Purples")
-    print(np.min(data),np.max(data))
+    p = f"outputs/ex/ex{frame}.dat"
+    data1,size = readGridFile(p)
+    data1 = data1.reshape(size,size,size)
+    ax1.imshow(data1[:,:,size//2],cmap="Purples")
+    # print(np.min(data),np.max(data))
+
+
 
 def update2Darrow(frame):
     ax1.clear()
@@ -169,7 +173,7 @@ def update2Darrow(frame):
 # update2Darrow(0)
 # update3D(5)
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=50,interval=50)
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=100,interval=50)
 ani.save(filename="figs/test_hfield.gif", writer="pillow")
 
 plt.show()

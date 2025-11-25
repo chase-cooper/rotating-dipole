@@ -56,8 +56,8 @@ DipoleUpdate updateDipole(Cell c,double t) {    // (porbably) Non-dimensionalize
     double Gneg = pow(GRIDSTEP/(sqrt(PI)*SIGMA),3)*exp(-(dxneg*dxneg + dyneg*dyneg + dzneg*dzneg)/(SIGMA*SIGMA));
 
     res.p = Gpos - Gneg;                                // Charge density
-    res.Jx = -sin(2.*PI*t)*(Gpos+Gneg);                 // Current density x-component
-    res.Jy = cos(2.*PI*t)*(Gpos+Gneg);                  // Current density y-component
+    res.Jx = -2.*sin(2.*PI*t)*(Gpos+Gneg);                 // Current density x-component
+    res.Jy = 2.*cos(2.*PI*t)*(Gpos+Gneg);                  // Current density y-component
     return res;
 }
 
@@ -284,6 +284,7 @@ Grid3D applyABC(Grid3D grid) {
     // Need to be updated all at once, not one by one?
 
     double coeff = (TIMESTEP - GRIDSTEP)/(TIMESTEP + GRIDSTEP);
+    // double coeff = -1./3.;
     int imax=GRIDSIZE-1;        // max index (i/j/k) shorthand
 
     Cell emptyCell = {0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -303,6 +304,40 @@ Grid3D applyABC(Grid3D grid) {
             grid[0][j][k].Ez = grid[1][j][k].Ez0 + coeff*(grid[1][j][k].Ez - grid[0][j][k].Ez0);
             grid[0][j][k].Hy = grid[1][j][k].Hy0 + coeff*(grid[1][j][k].Hy - grid[0][j][k].Hy0);
             grid[0][j][k].Hz = grid[1][j][k].Hz0 + coeff*(grid[1][j][k].Hz - grid[0][j][k].Hz0);
+        }
+    }
+
+    // update y-faces
+    for (int i=0; i < GRIDSIZE; i++) {
+        for (int k=0; k < GRIDSIZE; k++) {
+            // upper boundary
+            grid[i][imax][k].Ex = grid[i][imax-1][k].Ex0 + coeff*(grid[i][imax-1][k].Ey - grid[i][imax][k].Ex0);
+            grid[i][imax][k].Ez = grid[i][imax-1][k].Ez0 + coeff*(grid[i][imax-1][k].Ez - grid[i][imax][k].Ez0);
+            grid[i][imax][k].Hx = grid[i][imax-1][k].Hx0 + coeff*(grid[i][imax-1][k].Hy - grid[i][imax][k].Hx0);
+            grid[i][imax][k].Hz = grid[i][imax-1][k].Hz0 + coeff*(grid[i][imax-1][k].Hz - grid[i][imax][k].Hz0);
+
+            // lower boundary
+            grid[i][0][k].Ex = grid[i][1][k].Ex0 + coeff*(grid[i][1][k].Ex - grid[i][0][k].Ex0);
+            grid[i][0][k].Ez = grid[i][1][k].Ez0 + coeff*(grid[i][1][k].Ez - grid[i][0][k].Ez0);
+            grid[i][0][k].Hx = grid[i][1][k].Hx0 + coeff*(grid[i][1][k].Hx - grid[i][0][k].Hx0);
+            grid[i][0][k].Hz = grid[i][1][k].Hz0 + coeff*(grid[i][1][k].Hz - grid[i][0][k].Hz0);
+        }
+    }
+
+    // update z-faces
+    for (int i=0; i < GRIDSIZE; i++) {
+        for (int j=0; j < GRIDSIZE; j++) {
+            // upper boundary
+            grid[i][j][imax].Ex = grid[i][j][imax-1].Ex0 + coeff*(grid[i][j][imax-1].Ex - grid[i][j][imax].Ex0);
+            grid[i][j][imax].Ey = grid[i][j][imax-1].Ey0 + coeff*(grid[i][j][imax-1].Ey - grid[i][j][imax].Ey0);
+            grid[i][j][imax].Hx = grid[i][j][imax-1].Hx0 + coeff*(grid[i][j][imax-1].Hx - grid[i][j][imax].Hx0);
+            grid[i][j][imax].Hy = grid[i][j][imax-1].Hy0 + coeff*(grid[i][j][imax-1].Hy - grid[i][j][imax].Hy0);
+
+            // lower boundary
+            grid[i][j][0].Ex = grid[i][j][1].Ex0 + coeff*(grid[i][j][1].Ex - grid[i][j][0].Ex0);
+            grid[i][j][0].Ey = grid[i][j][1].Ey0 + coeff*(grid[i][j][1].Ey - grid[i][j][0].Ey0);
+            grid[i][j][0].Hx = grid[i][j][1].Hx0 + coeff*(grid[i][j][1].Hx - grid[i][j][0].Hx0);
+            grid[i][j][0].Hy = grid[i][j][1].Hy0 + coeff*(grid[i][j][1].Hy - grid[i][j][0].Hy0);
         }
     }
 
@@ -340,7 +375,6 @@ int main() {
         // Magnetic field half-step
         currentTime += 0.5*TIMESTEP;
         grid = currentUpdate(grid,currentTime);
-        
         grid = magneticFieldUpdate(grid);
 
         // Electric field half-step
