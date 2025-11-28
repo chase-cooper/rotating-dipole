@@ -135,12 +135,32 @@ def update3D(frame):
 
 def update2D(frame):
     ax1.clear()
-
-    p = f"outputs/ex/ex{frame}.dat"
+    # Variable plot
+    var = "hz"
+    p = f"outputs/{var}/{var}{frame}.dat"
+    p2 = f"outputs/hcon/hcon{frame}.dat"
     data1,size = readGridFile(p)
-    data1 = data1.reshape(size,size,size)
-    ax1.imshow(data1[:,:,size//2],cmap="Purples")
-    # print(np.min(data),np.max(data))
+    data2,_ = readGridFile(p2)
+    # d = np.divide(data2,data1)
+    d = data1.reshape(size,size,size)
+    m = 0.01 #np.max(np.abs(data1))
+    ax1.imshow(d[:,:,size//2],cmap="Purples_r",vmin=-m,vmax=m)
+
+    # Delta plot
+    # if frame>0:
+    #     var = "p"
+    #     p = f"outputs/{var}/{var}{frame}.dat"
+    #     data1,size = readGridFile(p)
+    #     data1 = data1.reshape(size,size,size)
+    
+    #     p0 = f"outputs/{var}/{var}{frame-1}.dat"
+    #     data2,_ = readGridFile(p0)
+    #     data2 = data2.reshape(size,size,size)
+
+    #     d = data1-data2
+    #     m = np.max(np.abs(d))
+    #     ax1.imshow(d[:,:,size//2],cmap="Purples_r",vmin=-m,vmax=m)
+        # print(np.sum(np.abs(data1)))
 
 
 
@@ -169,12 +189,12 @@ def update2Darrow(frame):
     
     print(np.min(datax),np.max(datax))
 
-# update2D(1)
+# update2D(100)
 # update2Darrow(0)
 # update3D(5)
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=100,interval=50)
-ani.save(filename="figs/test_hfield.gif", writer="pillow")
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=300,interval=50)
+ani.save(filename="figs/test.gif", writer="pillow")
 
 plt.show()
 
