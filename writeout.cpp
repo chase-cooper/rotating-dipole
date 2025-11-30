@@ -18,6 +18,7 @@ void writeOut(Grid3D grid,int id) {
     ofstream pfile("outputs/p/p"+to_string(id)+".dat");
     ofstream econfile("outputs/econ/econ"+to_string(id)+".dat");
     ofstream hconfile("outputs/hcon/hcon"+to_string(id)+".dat");
+    ofstream energy("outputs/energy/energy.dat");
 
     // Write grid side length, for reshaping data later
     exfile << GRIDSIZE << endl;

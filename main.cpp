@@ -35,8 +35,8 @@ Grid3D initGrid() {             // Non-dimensionalized
 DipoleUpdate updateDipole(Cell c,double t) {    // (porbably) Non-dimensionalized
     DipoleUpdate res;
     // Locations of dipole charges, units of dipole radii; time in units of dipole periods
-    double xpos = cos(t);
-    double ypos = sin(t);
+    double xpos = cos(SPEED*t);
+    double ypos = sin(SPEED*t);
     double zpos = 0.;
     double xneg = -xpos;
     double yneg = -ypos;
@@ -56,8 +56,8 @@ DipoleUpdate updateDipole(Cell c,double t) {    // (porbably) Non-dimensionalize
     double Gneg = pow(GRIDSTEP/(sqrt(PI)*SIGMA),3)*exp(-(dxneg*dxneg + dyneg*dyneg + dzneg*dzneg)/(SIGMA*SIGMA));
 
     res.p = Gpos - Gneg;                                // Charge density
-    res.Jx = -sin(t)*(Gpos+Gneg);                 // Current density x-component
-    res.Jy = cos(t)*(Gpos+Gneg);                  // Current density y-component
+    res.Jx = -SPEED*sin(SPEED*t)*(Gpos+Gneg);                 // Current density x-component
+    res.Jy = SPEED*cos(SPEED*t)*(Gpos+Gneg);                  // Current density y-component
     return res;
 }
 
@@ -285,7 +285,8 @@ Grid3D magneticFieldUpdate(Grid3D grid) {
 Grid3D applyABC(Grid3D grid) {
 
     // Need to be updated all at once, not one by one?
-    double coeff = (TIMESTEP - GRIDSTEP)/(TIMESTEP + GRIDSTEP);
+    // double coeff = (TIMESTEP - GRIDSTEP)/(TIMESTEP + GRIDSTEP);
+    double coeff = -0.5;
     int imax=GRIDSIZE-1;        // max index (i/j/k) shorthand
 
     Cell emptyCell = {0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -299,54 +300,54 @@ Grid3D applyABC(Grid3D grid) {
             //                                 //  it is double-counted, so update values are halved.
             // if ((j==0)||(k==0)||(j==imax)||(k==imax)) {edgefactor = 0.5;}
             // upper boundary
-            newgrid[imax][j][k].Ey += grid[imax-1][j][k].Ey0 + coeff*(grid[imax-1][j][k].Ey - grid[imax][j][k].Ey0);
-            newgrid[imax][j][k].Ez += grid[imax-1][j][k].Ez0 + coeff*(grid[imax-1][j][k].Ez - grid[imax][j][k].Ez0);
-            newgrid[imax][j][k].Hy += grid[imax-1][j][k].Hy0 + coeff*(grid[imax-1][j][k].Hy - grid[imax][j][k].Hy0);
-            newgrid[imax][j][k].Hz += grid[imax-1][j][k].Hz0 + coeff*(grid[imax-1][j][k].Hz - grid[imax][j][k].Hz0);
+            newgrid[imax][j][k].Ey += grid[imax-1][j][k].Ey0 + coeff*(grid[imax-1][j][k].Ey0 - grid[imax][j][k].Ey0);
+            newgrid[imax][j][k].Ez += grid[imax-1][j][k].Ez0 + coeff*(grid[imax-1][j][k].Ez0 - grid[imax][j][k].Ez0);
+            newgrid[imax][j][k].Hy += grid[imax-1][j][k].Hy0 + coeff*(grid[imax-1][j][k].Hy0 - grid[imax][j][k].Hy0);
+            newgrid[imax][j][k].Hz += grid[imax-1][j][k].Hz0 + coeff*(grid[imax-1][j][k].Hz0 - grid[imax][j][k].Hz0);
             // upper boundary
-            newgrid[0][j][k].Ey += grid[1][j][k].Ey0 + coeff*(grid[1][j][k].Ey - grid[0][j][k].Ey0);
-            newgrid[0][j][k].Ez += grid[1][j][k].Ez0 + coeff*(grid[1][j][k].Ez - grid[0][j][k].Ez0);
-            newgrid[0][j][k].Hy += grid[1][j][k].Hy0 + coeff*(grid[1][j][k].Hy - grid[0][j][k].Hy0);
-            newgrid[0][j][k].Hz += grid[1][j][k].Hz0 + coeff*(grid[1][j][k].Hz - grid[0][j][k].Hz0);
+            newgrid[0][j][k].Ey += grid[1][j][k].Ey0 + coeff*(grid[1][j][k].Ey0 - grid[0][j][k].Ey0);
+            newgrid[0][j][k].Ez += grid[1][j][k].Ez0 + coeff*(grid[1][j][k].Ez0 - grid[0][j][k].Ez0);
+            newgrid[0][j][k].Hy += grid[1][j][k].Hy0 + coeff*(grid[1][j][k].Hy0 - grid[0][j][k].Hy0);
+            newgrid[0][j][k].Hz += grid[1][j][k].Hz0 + coeff*(grid[1][j][k].Hz0 - grid[0][j][k].Hz0);
         }
     }
 
     // update y-faces
-    for (int i=1; i < GRIDSIZE-1; i++) {
+    for (int i=0; i < GRIDSIZE; i++) {
         for (int k=0; k < GRIDSIZE; k++) {
             // double edgefactor = 1.;         // This factor will change to 0.5 if current cell is on an edge, in which case
             //                                 //  it is double-counted, so update values are halved.
             // if ((i==0)||(k==0)||(i==imax)||(k==imax)) {edgefactor = 0.5;}
             // upper boundary
-            newgrid[i][imax][k].Ex += grid[i][imax-1][k].Ex0 + coeff*(grid[i][imax-1][k].Ex - grid[i][imax][k].Ex0);
-            newgrid[i][imax][k].Ez += grid[i][imax-1][k].Ez0 + coeff*(grid[i][imax-1][k].Ez - grid[i][imax][k].Ez0);
-            newgrid[i][imax][k].Hx += grid[i][imax-1][k].Hx0 + coeff*(grid[i][imax-1][k].Hx - grid[i][imax][k].Hx0);
-            newgrid[i][imax][k].Hz += grid[i][imax-1][k].Hz0 + coeff*(grid[i][imax-1][k].Hz - grid[i][imax][k].Hz0);
+            newgrid[i][imax][k].Ex += grid[i][imax-1][k].Ex0 + coeff*(grid[i][imax-1][k].Ex0 - grid[i][imax][k].Ex0);
+            newgrid[i][imax][k].Ez += grid[i][imax-1][k].Ez0 + coeff*(grid[i][imax-1][k].Ez0 - grid[i][imax][k].Ez0);
+            newgrid[i][imax][k].Hx += grid[i][imax-1][k].Hx0 + coeff*(grid[i][imax-1][k].Hx0 - grid[i][imax][k].Hx0);
+            newgrid[i][imax][k].Hz += grid[i][imax-1][k].Hz0 + coeff*(grid[i][imax-1][k].Hz0 - grid[i][imax][k].Hz0);
             // lower boundary
-            newgrid[i][0][k].Ex += grid[i][1][k].Ex0 + coeff*(grid[i][1][k].Ex - grid[i][0][k].Ex0);
-            newgrid[i][0][k].Ez += grid[i][1][k].Ez0 + coeff*(grid[i][1][k].Ez - grid[i][0][k].Ez0);
-            newgrid[i][0][k].Hx += grid[i][1][k].Hx0 + coeff*(grid[i][1][k].Hx - grid[i][0][k].Hx0);
-            newgrid[i][0][k].Hz += grid[i][1][k].Hz0 + coeff*(grid[i][1][k].Hz - grid[i][0][k].Hz0);
+            newgrid[i][0][k].Ex += grid[i][1][k].Ex0 + coeff*(grid[i][1][k].Ex0 - grid[i][0][k].Ex0);
+            newgrid[i][0][k].Ez += grid[i][1][k].Ez0 + coeff*(grid[i][1][k].Ez0 - grid[i][0][k].Ez0);
+            newgrid[i][0][k].Hx += grid[i][1][k].Hx0 + coeff*(grid[i][1][k].Hx0 - grid[i][0][k].Hx0);
+            newgrid[i][0][k].Hz += grid[i][1][k].Hz0 + coeff*(grid[i][1][k].Hz0 - grid[i][0][k].Hz0);
         }
     }
 
     // update z-faces
-    for (int i=1; i < GRIDSIZE-1; i++) {
-        for (int j=1; j < GRIDSIZE-1; j++) {
+    for (int i=0; i < GRIDSIZE; i++) {
+        for (int j=0; j < GRIDSIZE; j++) {
             // double edgefactor = 1.;         // This factor will change to 0.5 if current cell is on an edge, in which case
             //                                 //  it is double-counted, so update values are halved.
             // if ((i==0)||(j==0)||(i==imax)||(j==imax)) {edgefactor = 0.5;}
             
             // upper boundary
-            newgrid[i][j][imax].Ex += grid[i][j][imax-1].Ex0 + coeff*(grid[i][j][imax-1].Ex - grid[i][j][imax].Ex0);
-            newgrid[i][j][imax].Ey += grid[i][j][imax-1].Ey0 + coeff*(grid[i][j][imax-1].Ey - grid[i][j][imax].Ey0);
-            newgrid[i][j][imax].Hx += grid[i][j][imax-1].Hx0 + coeff*(grid[i][j][imax-1].Hx - grid[i][j][imax].Hx0);
-            newgrid[i][j][imax].Hy += grid[i][j][imax-1].Hy0 + coeff*(grid[i][j][imax-1].Hy - grid[i][j][imax].Hy0);
+            newgrid[i][j][imax].Ex += grid[i][j][imax-1].Ex0 + coeff*(grid[i][j][imax-1].Ex0 - grid[i][j][imax].Ex0);
+            newgrid[i][j][imax].Ey += grid[i][j][imax-1].Ey0 + coeff*(grid[i][j][imax-1].Ey0 - grid[i][j][imax].Ey0);
+            newgrid[i][j][imax].Hx += grid[i][j][imax-1].Hx0 + coeff*(grid[i][j][imax-1].Hx0 - grid[i][j][imax].Hx0);
+            newgrid[i][j][imax].Hy += grid[i][j][imax-1].Hy0 + coeff*(grid[i][j][imax-1].Hy0 - grid[i][j][imax].Hy0);
             // lower boundary
-            newgrid[i][j][0].Ex += grid[i][j][1].Ex0 + coeff*(grid[i][j][1].Ex - grid[i][j][0].Ex0);
-            newgrid[i][j][0].Ey += grid[i][j][1].Ey0 + coeff*(grid[i][j][1].Ey - grid[i][j][0].Ey0);
-            newgrid[i][j][0].Hx += grid[i][j][1].Hx0 + coeff*(grid[i][j][1].Hx - grid[i][j][0].Hx0);
-            newgrid[i][j][0].Hy += grid[i][j][1].Hy0 + coeff*(grid[i][j][1].Hy - grid[i][j][0].Hy0);
+            newgrid[i][j][0].Ex += grid[i][j][1].Ex0 + coeff*(grid[i][j][1].Ex0 - grid[i][j][0].Ex0);
+            newgrid[i][j][0].Ey += grid[i][j][1].Ey0 + coeff*(grid[i][j][1].Ey0 - grid[i][j][0].Ey0);
+            newgrid[i][j][0].Hx += grid[i][j][1].Hx0 + coeff*(grid[i][j][1].Hx0 - grid[i][j][0].Hx0);
+            newgrid[i][j][0].Hy += grid[i][j][1].Hy0 + coeff*(grid[i][j][1].Hy0 - grid[i][j][0].Hy0);
             
         }
     }
@@ -355,7 +356,7 @@ Grid3D applyABC(Grid3D grid) {
         for (int ind2=0; ind2 < GRIDSIZE; ind2++) {
             double edgefactor = 1.;         // This factor will change to 0.5 if current cell is on an edge, in which case
                                             //  it is double-counted, so update values are halved.
-            if ((ind1==0)||(ind2==0)||(ind1==imax)||(ind2==imax)) {edgefactor = 0.5;}
+            // if ((ind1==0)||(ind2==0)||(ind1==imax)||(ind2==imax)) {edgefactor = 0.5;}
             // x-faces
             // upper boundary
             grid[imax][ind1][ind2].Ey = edgefactor * (newgrid[imax][ind1][ind2].Ey);
@@ -396,6 +397,8 @@ Grid3D applyABC(Grid3D grid) {
     return grid;
 }
 
+// Functions for evaluating the system
+
 double GaussLaw(Grid3D grid) {
     int imax = GRIDSIZE-1;
     double totalFlux;
@@ -409,6 +412,32 @@ double GaussLaw(Grid3D grid) {
     return totalFlux;
 }
 
+double GridEnergy(Grid3D grid) {
+    int imax = GRIDSIZE-1;
+    double totalEnergy;
+    
+    for (int i=0;i<GRIDSIZE;i++) {
+        for (int j=0;j<GRIDSIZE;j++) {
+            for (int k=0;k<GRIDSIZE;k++) {
+                totalEnergy += 0.5*sqrt(pow(grid[i][j][k].Ex,2.) + pow(grid[i][j][k].Ey,2.) + pow(grid[i][j][k].Ey,2.));
+                totalEnergy += 0.5*sqrt(pow(grid[i][j][k].Hx,2.) + pow(grid[i][j][k].Hy,2.) + pow(grid[i][j][k].Hz,2.));
+            }
+        }
+    }
+
+    return totalEnergy * pow(GRIDSTEP,3.);
+}
+
+vector<double> PoyntingVector(Grid3D grid,int i,int j,int k) {
+    double xcomp = (grid[i][j][k].Ey * grid[i][j][k].Hz) - (grid[i][j][k].Ez * grid[i][j][k].Hy);
+    double ycomp = (grid[i][j][k].Ez * grid[i][j][k].Hx) - (grid[i][j][k].Ex * grid[i][j][k].Hz);
+    double zcomp = (grid[i][j][k].Ex * grid[i][j][k].Hy) - (grid[i][j][k].Ey * grid[i][j][k].Hx);
+    // double largest = max(max(abs(xcomp),abs(ycomp)),abs(zcomp));
+
+    vector<double> res = {xcomp,ycomp,zcomp};
+    return res;
+}
+
 // Main
 int main() {
     // // Initialize grid
@@ -417,10 +446,15 @@ int main() {
     grid = chargeUpdate(grid,currentTime);
     grid = currentUpdate(grid,currentTime);
     grid = electricFieldRelaxation(grid);
-    cout << "Gauss' Law initial estimate: q = " << to_string(GaussLaw(grid)) << endl;
+
+    cout << setprecision(10);
+    cout << "Gauss' Law initial estimate: q = " << GaussLaw(grid) << endl;
 
     writeOut(grid,0);
     cout << "Initial conditions written to file. Beginning loop..." << endl;
+
+    ofstream summary("outputs/summary.dat");
+    summary << "Step \tGauss' Law \t\tEnergy\t\t\tPoynting Vector (Scaled)" << endl;
 
     for (int count=1;count <= LOOPCOUNT;count++) {       // count is just the loop counter variable
         // Magnetic field half-step
@@ -436,9 +470,15 @@ int main() {
         grid = applyABC(grid);
 
         writeOut(grid,count);
+
+        double g = GaussLaw(grid);
+        double e = GridEnergy(grid);
         cout << "Finished loop " << to_string(count) << " of " << to_string(LOOPCOUNT);
-        cout << "; Gauss' Law estimate q = " << to_string(GaussLaw(grid)) << endl;
+        cout << "; Gauss' Law estimate q = " << g;
+        cout << "; Total energy E = " << e << endl;
+        summary << count << "\t\t" << g << "\t\t" << e << "\t\t\t";
     }
+    
 
     return 0;
     

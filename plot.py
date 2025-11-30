@@ -34,7 +34,6 @@ def plotGrid(gridarray,gridsize):
     plt.close()
 
 fig = plt.figure()
-fig.suptitle("This animation is dedicated to Rebecca Moore.\n She's not dead but goddamn",size='x-large')
 gs = fig.add_gridspec(ncols=3)
 ax1 = fig.add_subplot(gs[:])
 # ax2 = fig.add_subplot(gs[1])
@@ -143,7 +142,7 @@ def update2D(frame):
     data2,_ = readGridFile(p2)
     # d = np.divide(data2,data1)
     d = data1.reshape(size,size,size)
-    m = 0.01 #np.max(np.abs(data1))
+    m = np.max(np.abs(data1))
     ax1.imshow(d[:,:,size//2],cmap="Purples_r",vmin=-m,vmax=m)
 
     # Delta plot
