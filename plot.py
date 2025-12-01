@@ -142,24 +142,10 @@ def update2D(frame):
     data2,_ = readGridFile(p2)
     # d = np.divide(data2,data1)
     d = data1.reshape(size,size,size)
-    m = np.max(np.abs(data1))
-    ax1.imshow(d[:,:,size//2],cmap="Purples_r",vmin=-m,vmax=m)
+    m = 2e-2 #np.max(np.abs(data1))
+    im = ax1.imshow(d[:,:,size//2],cmap="coolwarm",vmin=-m,vmax=m)
 
-    # Delta plot
-    # if frame>0:
-    #     var = "p"
-    #     p = f"outputs/{var}/{var}{frame}.dat"
-    #     data1,size = readGridFile(p)
-    #     data1 = data1.reshape(size,size,size)
-    
-    #     p0 = f"outputs/{var}/{var}{frame-1}.dat"
-    #     data2,_ = readGridFile(p0)
-    #     data2 = data2.reshape(size,size,size)
-
-    #     d = data1-data2
-    #     m = np.max(np.abs(d))
-    #     ax1.imshow(d[:,:,size//2],cmap="Purples_r",vmin=-m,vmax=m)
-        # print(np.sum(np.abs(data1)))
+    ax1.set_title(r"$H_z$")
 
 
 
@@ -188,11 +174,11 @@ def update2Darrow(frame):
     
     print(np.min(datax),np.max(datax))
 
-# update2D(100)
+# update2D(450)
 # update2Darrow(0)
 # update3D(5)
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=300,interval=50)
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=500,interval=50)
 ani.save(filename="figs/test.gif", writer="pillow")
 
 plt.show()

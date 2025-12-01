@@ -356,7 +356,7 @@ Grid3D applyABC(Grid3D grid) {
         for (int ind2=0; ind2 < GRIDSIZE; ind2++) {
             double edgefactor = 1.;         // This factor will change to 0.5 if current cell is on an edge, in which case
                                             //  it is double-counted, so update values are halved.
-            // if ((ind1==0)||(ind2==0)||(ind1==imax)||(ind2==imax)) {edgefactor = 0.5;}
+            if ((ind1==0)||(ind2==0)||(ind1==imax)||(ind2==imax)) {edgefactor = 0.5;}
             // x-faces
             // upper boundary
             grid[imax][ind1][ind2].Ey = edgefactor * (newgrid[imax][ind1][ind2].Ey);
@@ -368,7 +368,8 @@ Grid3D applyABC(Grid3D grid) {
             grid[0][ind1][ind2].Ez = edgefactor * (newgrid[0][ind1][ind2].Ez);
             grid[0][ind1][ind2].Hy = edgefactor * (newgrid[0][ind1][ind2].Hy);
             grid[0][ind1][ind2].Hz = edgefactor * (newgrid[0][ind1][ind2].Hz);
-            // y-0
+
+            // y-faces
             // upper boundary
             grid[ind1][imax][ind2].Ex = edgefactor * (newgrid[ind1][imax][ind2].Ex);
             grid[ind1][imax][ind2].Ez = edgefactor * (newgrid[ind1][imax][ind2].Ez);
@@ -379,6 +380,7 @@ Grid3D applyABC(Grid3D grid) {
             grid[ind1][0][ind2].Ez = edgefactor * (newgrid[ind1][0][ind2].Ez);
             grid[ind1][0][ind2].Hx = edgefactor * (newgrid[ind1][0][ind2].Hx);
             grid[ind1][0][ind2].Hz = edgefactor * (newgrid[ind1][0][ind2].Hz);
+
             // z-faces
             // upper boundary
             grid[ind1][ind2][imax].Ex = edgefactor * (newgrid[ind1][ind2][imax].Ex);
