@@ -15,15 +15,12 @@ struct Cell {
     double EConstraint;         // monitors electric field divergence constraint
 
     double Jx,Jy;               // Current density
-    double Hx,Hy,Hz;            // Magnetic Field
+    double Hx,Hy,Hz;            // Magnetic Field (initialized to 0; equation 19)
     double Hx0,Hy0,Hz0;         // Previous step magnetic field
     double HConstraint;         // monitors "no magnetic monopoles" rule
     
     int color;                  // "color" used for electric field relaxation
 };
-typedef vector<vector<vector<Cell>>> Grid3D;
 
-struct DipoleUpdate {
-    double p;
-    double Jx,Jy;
-};
+// Define grid object class
+typedef vector<vector<vector<Cell>>> Grid3D;

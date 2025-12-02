@@ -6,6 +6,10 @@
 using namespace std;
 
 void writeOut(Grid3D grid,int id) {
+    // This function writes out the E- and H-field components, current density components,
+    //      charge density, and E- and H-field constraint values of each cell. Also saves
+    //      the total grid energy.
+
     // Defining files that hold data
     ofstream exfile("outputs/ex/ex"+to_string(id)+".dat");
     ofstream eyfile("outputs/ey/ey"+to_string(id)+".dat");
@@ -33,25 +37,10 @@ void writeOut(Grid3D grid,int id) {
     econfile << GRIDSIZE << endl;
     hconfile << GRIDSIZE << endl;
 
-    // Set precision t avoid saving unneccessarily precise data
-    // exfile << setprecision(4);
-    // eyfile << setprecision(4);
-    // ezfile << setprecision(4);
-    // hxfile << setprecision(4);
-    // hyfile << setprecision(4);
-    // hzfile << setprecision(4);
-    // jxfile << setprecision(4);
-    // jyfile << setprecision(4);
-    // pfile << setprecision(4);
-    // phifile << setprecision(4);
-    // econfile << setprecision(4);
-    // hconfile << setprecision(4);
-
     // Write data
     for (int i=0;i<GRIDSIZE;i++) {
         for (int j=0;j<GRIDSIZE;j++) {
             for (int k=0;k<GRIDSIZE;k++) {
-                // Cell c = grid[i][j][k];
                 exfile << grid[i][j][k].Ex << "\t";
                 eyfile << grid[i][j][k].Ey << "\t";
                 ezfile << grid[i][j][k].Ez << "\t";

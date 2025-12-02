@@ -142,7 +142,7 @@ def update2D(frame):
     data2,_ = readGridFile(p2)
     # d = np.divide(data2,data1)
     d = data1.reshape(size,size,size)
-    m = 2e-2 #np.max(np.abs(data1))
+    m = 1e-2 #np.max(np.abs(data1))
     im = ax1.imshow(d[:,:,size//2],cmap="coolwarm",vmin=-m,vmax=m)
 
     ax1.set_title(r"$H_z$")
@@ -178,7 +178,7 @@ def update2Darrow(frame):
 # update2Darrow(0)
 # update3D(5)
 
-ani = anim.FuncAnimation(fig=fig,func=update2D,frames=500,interval=50)
+ani = anim.FuncAnimation(fig=fig,func=update2D,frames=300,interval=50)
 ani.save(filename="figs/test.gif", writer="pillow")
 
 plt.show()
